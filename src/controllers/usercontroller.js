@@ -42,9 +42,11 @@ const createUser = async (req, res) => {
       tenantId,
     });
 
+    const userResponse = await User.findById(user._id).select("-password");
+
     res.status(201).json({
       success: true,
-      user,
+      user: userResponse,
     });
   } catch (error) {
     console.error(error);
@@ -58,9 +60,11 @@ const createUser = async (req, res) => {
 
 const getUsers = async (req, res) => {
   try {
-  const users = await User.find({
-  tenantId: req.user.tenantId,
-}).populate("tenantId");
+    const users = await User.find({
+      tenantId: req.user.tenantId,
+    })
+      .select("-password")
+      .populate("tenantId");
 
     res.status(200).json({
       success: true,
@@ -78,11 +82,7 @@ const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-  console.log("EMAIL:", email);
-
-const user = await User.findOne({ email });
-
-console.log("USER:", user);
+    const user = await User.findOne({ email });
 
     if (!user) {
       return res.status(400).json({
